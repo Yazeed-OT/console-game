@@ -139,41 +139,62 @@ public sealed class Game
         var heightWithBorder = PlayfieldHeight + 2;
         var scoreboardLine = BuildScoreboard(widthWithBorder);
 
-        var boardBuilder = new StringBuilder();
-        boardBuilder.AppendLine(scoreboardLine);
+        Console.SetCursorPosition(0, 0);
+
+        // Draw scoreboard (use default color)
+        Console.ResetColor();
+        Console.WriteLine(scoreboardLine);
 
         for (var y = 0; y < heightWithBorder; y++)
         {
             for (var x = 0; x < widthWithBorder; x++)
             {
+                char ch;
+                ConsoleColor? color = null;
+
                 if (y == 0 || y == heightWithBorder - 1 || x == 0 || x == widthWithBorder - 1)
                 {
-                    boardBuilder.Append('#');
-                    continue;
-                }
-
-                var pos = new Position(x, y);
-                if (_food == pos && _state != GameState.GameOver)
-                {
-                    boardBuilder.Append('*');
-                }
-                else if (_snake.TryGetSegmentAt(pos, out var index))
-                {
-                    boardBuilder.Append(index == 0 ? '@' : 'o');
+                    ch = '#';
                 }
                 else
                 {
-                    boardBuilder.Append(' ');
+                    var pos = new Position(x, y);
+                    if (_food == pos && _state != GameState.GameOver)
+                    {
+                        ch = 'A'; // represent apple
+                        color = ConsoleColor.Red;
+                    }
+                    else if (_snake.TryGetSegmentAt(pos, out var index))
+                    {
+                        ch = index == 0 ? '@' : 'o';
+                        color = ConsoleColor.Green;
+                    }
+                    else
+                    {
+                        ch = ' ';
+                    }
                 }
+
+                if (color.HasValue)
+                {
+                    Console.ForegroundColor = color.Value;
+                }
+                else
+                {
+                    Console.ResetColor();
+                }
+
+                Console.Write(ch);
             }
 
-            boardBuilder.AppendLine();
+            Console.ResetColor();
+            Console.WriteLine();
         }
 
-        AppendMessageLines(boardBuilder, widthWithBorder);
-
-        Console.SetCursorPosition(0, 0);
-        Console.Write(boardBuilder.ToString());
+        // Append message lines under the board
+        var messages = new StringBuilder();
+        AppendMessageLines(messages, widthWithBorder);
+        Console.Write(messages.ToString());
     }
 
     private void AppendMessageLines(StringBuilder builder, int width)
