@@ -242,6 +242,11 @@ public sealed class Game
         _newRecordBlinkActive = _isNewRecord && _newRecordBlinkStartMs > 0 && elapsedSinceNewRecord <= NewRecordBlinkDurationMs;
         _newRecordBlinkOn = _newRecordBlinkActive && (((int)(elapsedSinceNewRecord / NewRecordBlinkIntervalMs) % 2) == 0);
 
+        // Prepare centered GAME OVER message coordinates (used when game is over)
+        const string gameOverMessage = "GAME OVER !";
+        var boardCenterY = heightWithBorder / 2; // integer center of board (includes borders)
+        var messageStartX = Math.Max(1, (widthWithBorder - gameOverMessage.Length) / 2);
+
         // Draw scoreboard with colored high score (blink when new record)
         Console.ResetColor();
         var scorePart = $"Score: {_score,4}  ";
@@ -382,6 +387,13 @@ public sealed class Game
                     {
                         cell = " ";
                     }
+                    // Overlay centered GAME OVER message inside the playfield when the game ends.
+                    if (_state == GameState.GameOver && y == boardCenterY && x >= messageStartX && x < messageStartX + gameOverMessage.Length)
+                    {
+                        var ch = gameOverMessage[x - messageStartX].ToString();
+                        cell = ch;
+                        color = ConsoleColor.Red;
+                    }
                 }
 
                 if (color.HasValue)
@@ -452,10 +464,13 @@ public sealed class Game
         {
             line1 = "Select Mode: 1. Normal   2. Extreme".PadRight(messageWidth);
             line2 = ($"Selected: {_difficulty}    Press any direction to begin.").PadRight(messageWidth);
+            line3 = "Controls: Arrow keys or WASD to move".PadRight(messageWidth);
         }
         else if (_state == GameState.GameOver)
         {
-            line1 = "GAME OVER".PadRight(messageWidth);
+            // The prominent "GAME OVER" is rendered inside the box; leave this line blank
+            // so the message does not appear again below the playfield.
+            line1 = string.Empty.PadRight(messageWidth);
             line2 = $"Final Score: {_score}".PadRight(messageWidth);
             line3 = _isNewRecord ? "NEW RECORD!".PadRight(messageWidth) : string.Empty.PadRight(messageWidth);
             line4 = "Press R to restart or Q to quit.".PadRight(messageWidth);
