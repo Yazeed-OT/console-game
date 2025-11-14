@@ -38,6 +38,8 @@ public sealed class Game
     private const double NewRecordBlinkIntervalMs = 500.0;
     private bool _newRecordBlinkActive;
     private bool _newRecordBlinkOn;
+    private const double RareFlashDelayMs = 3000.0;
+    private const double RareFlashIntervalMs = 500.0;
 
     private enum Difficulty
     {
@@ -54,14 +56,16 @@ public sealed class Game
 
     private readonly struct Item
     {
-        public Item(Position position, ItemType type)
+        public Item(Position position, ItemType type, double spawnMs)
         {
             Position = position;
             Type = type;
+            SpawnMs = spawnMs;
         }
 
         public Position Position { get; }
         public ItemType Type { get; }
+        public double SpawnMs { get; }
     }
 
     public void Run()
@@ -314,7 +318,8 @@ public sealed class Game
                     var pos = new Position(x, y);
                     if (_item.Position == pos && _state != GameState.GameOver)
                     {
-                        // Render item based on type and difficulty
+                        // Render item based on type and difficulty. In Extreme mode the rare
+                        // fruit will begin flashing after a short delay.
                         switch (_item.Type)
                         {
                             case ItemType.Normal:
@@ -322,7 +327,25 @@ public sealed class Game
                                 color = ConsoleColor.Red;
                                 break;
                             case ItemType.Rare:
-                                cell = _difficulty == Difficulty.Extreme ? "🍇" : "G";
+                                if (_difficulty == Difficulty.Extreme)
+                                {
+                                    // Determine elapsed time since spawn and start flashing after the delay
+                                    var elapsedSinceSpawn = _stopwatch.Elapsed.TotalMilliseconds - _item.SpawnMs;
+                                    if (elapsedSinceSpawn >= RareFlashDelayMs)
+                                    {
+                                        var on = (((int)(elapsedSinceSpawn / RareFlashIntervalMs) % 2) == 0);
+                                        cell = on ? "🍇" : " ";
+                                    }
+                                    else
+                                    {
+                                        cell = "🍇";
+                                    }
+                                }
+                                else
+                                {
+                                    cell = "G";
+                                }
+
                                 color = ConsoleColor.Magenta;
                                 break;
                             case ItemType.Poison:
@@ -418,7 +441,8 @@ public sealed class Game
     private void AppendMessageLines(StringBuilder builder, int width)
     {
         var messageWidth = width;
-        // We'll produce up to 4 message lines so the restart/quit line sits below the NEW RECORD line
+        // We'll produce a few message lines so the restart/quit line sits below the NEW RECORD line.
+        // When in Extreme mode we also show a short legend describing the emoji items.
         string line1 = string.Empty.PadRight(messageWidth);
         string line2 = string.Empty.PadRight(messageWidth);
         string line3 = string.Empty.PadRight(messageWidth); // NEW RECORD (may blink)
@@ -460,6 +484,14 @@ public sealed class Game
 
         // Append the persistent restart/quit line (does not blink)
         builder.AppendLine(line4);
+
+        // If we're in Extreme mode, show a concise legend for the emoji items below the usual messages.
+        if (_difficulty == Difficulty.Extreme)
+        {
+            builder.AppendLine("🍎 Normal food = +10 score".PadRight(messageWidth));
+            builder.AppendLine("🍇 Rare fruit = +20 score".PadRight(messageWidth));
+            builder.AppendLine("💣 Poison = -10 score".PadRight(messageWidth));
+        }
     }
 
     private string BuildScoreboard(int width)
@@ -619,7 +651,9 @@ public sealed class Game
             type = ItemType.Normal;
         }
 
-        _item = new Item(candidate, type);
+        // Record spawn time so we can animate (flash) certain item types later.
+        var spawnMs = _stopwatch.Elapsed.TotalMilliseconds;
+        _item = new Item(candidate, type, spawnMs);
     }
 
     private void UpdateLevelAndSpeed()
