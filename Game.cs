@@ -333,8 +333,27 @@ public sealed class Game
                     }
                     else if (_snake.TryGetSegmentAt(pos, out var index))
                     {
-                        cell = index == 0 ? "@" : "o";
-                        color = ConsoleColor.Green;
+                        // Make the snake look a bit more "alive":
+                        // - Use a distinct head with eyes
+                        // - Draw the tail with a smaller dot
+                        // - Keep the body rounded
+                        if (index == 0)
+                        {
+                            // Use a bold circle for the head so it
+                            // stands out from the body segments.
+                            cell = "●";
+                            color = ConsoleColor.Green;
+                        }
+                        else if (index == _snake.Length - 1)
+                        {
+                            cell = "·"; // tail
+                            color = ConsoleColor.DarkGreen;
+                        }
+                        else
+                        {
+                            cell = "○"; // body
+                            color = ConsoleColor.Green;
+                        }
                     }
                     else
                     {
