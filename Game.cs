@@ -214,6 +214,7 @@ public sealed class Game
                         StartGame(Direction.Right);
                     }
                     break;
+                // (L toggle removed) 
                 case ConsoleKey.Q:
                 case ConsoleKey.Escape:
                     _isRunning = false;
@@ -293,6 +294,42 @@ public sealed class Game
 
         for (var y = 0; y < heightWithBorder; y++)
         {
+            // In Extreme mode, draw the top/bottom border as a single string so corners
+            // connect cleanly with the doubled horizontals. Fall back to per-cell
+            // rendering for interior rows and non-Extreme mode.
+            if (isExtreme && (y == 0 || y == heightWithBorder - 1))
+            {
+                Console.ForegroundColor = borderColor;
+                if (y == 0)
+                {
+                    Console.Write(topLeft);
+                }
+                else
+                {
+                    Console.Write(bottomLeft);
+                }
+
+                // Draw the interior horizontals doubled per inner cell
+                var innerCount = Math.Max(0, widthWithBorder - 2);
+                Console.Write(new string('═', innerCount * 2));
+
+                if (y == 0)
+                {
+                    Console.Write(topRight);
+                }
+                else
+                {
+                    Console.Write(bottomRight);
+                }
+
+                // pad and finish the line
+                var padLengthBorder = Math.Max(0, maxDisplayedWidth - displayedWidth);
+                if (padLengthBorder > 0) Console.Write(new string(' ', padLengthBorder));
+                Console.ResetColor();
+                Console.WriteLine();
+                continue;
+            }
+
             for (var x = 0; x < widthWithBorder; x++)
             {
                 string cell = " ";
@@ -419,6 +456,12 @@ public sealed class Game
                         // draw horizontal double for nicer border in extreme mode
                         Console.Write(new string('═', 2));
                     }
+                    else if (cell == topLeft || cell == topRight || cell == bottomLeft || cell == bottomRight || cell == vertical)
+                    {
+                        // Corners should be printed without an extra trailing space so the
+                        // doubled horizontals line up cleanly next to them.
+                        Console.Write(cell);
+                    }
                     else
                     {
                         Console.Write(cell);
@@ -500,8 +543,9 @@ public sealed class Game
         // Append the persistent restart/quit line (does not blink)
         builder.AppendLine(line4);
 
-        // If we're in Extreme mode, show a concise legend for the emoji items below the usual messages.
-        if (_difficulty == Difficulty.Extreme)
+        // If we're in Extreme mode and not on the start screen, show a concise legend
+        // for the emoji items below the usual messages.
+        if (_difficulty == Difficulty.Extreme && _state != GameState.Start)
         {
             builder.AppendLine("🍎 Normal food = +10 score".PadRight(messageWidth));
             builder.AppendLine("🍇 Rare fruit = +20 score".PadRight(messageWidth));
