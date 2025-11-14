@@ -1,0 +1,15 @@
+/workspaces/console-game/bin/Debug/net8.0/ConsoleGame
+/workspaces/console-game/bin/Debug/net8.0/ConsoleGame.deps.json
+/workspaces/console-game/bin/Debug/net8.0/ConsoleGame.runtimeconfig.json
+/workspaces/console-game/bin/Debug/net8.0/ConsoleGame.dll
+/workspaces/console-game/bin/Debug/net8.0/ConsoleGame.pdb
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.AssemblyInfoInputs.cache
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.AssemblyInfo.cs
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.csproj.CoreCompileInputs.cache
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.sourcelink.json
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.dll
+/workspaces/console-game/obj/Debug/net8.0/refint/ConsoleGame.dll
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.pdb
+/workspaces/console-game/obj/Debug/net8.0/ConsoleGame.genruntimeconfig.cache
+/workspaces/console-game/obj/Debug/net8.0/ref/ConsoleGame.dll

@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/workspaces/console-game/ConsoleGame/ConsoleGame.csproj",
+      "projectUniqueName": "/workspaces/console-game/ConsoleGame.csproj",
       "projectName": "ConsoleGame",
-      "projectPath": "/workspaces/console-game/ConsoleGame/ConsoleGame.csproj",
+      "projectPath": "/workspaces/console-game/ConsoleGame.csproj",
       "packagesPath": "/home/codespace/.nuget/packages/",
-      "outputPath": "/workspaces/console-game/ConsoleGame/obj/",
+      "outputPath": "/workspaces/console-game/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/codespace/.nuget/NuGet/NuGet.Config"
