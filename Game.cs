@@ -113,20 +113,20 @@ public sealed class Game
         var itemAtNext = _item.Position == nextHead ? _item : default;
         var willEat = _item.Position == nextHead;
 
-        // Determine growth based on item type (poison does not grow)
+        
         var grow = willEat && _item.Type != ItemType.Poison;
         var head = _snake.Move(grow);
 
         if (IsOutOfBounds(head) || _snake.HasSelfCollision())
         {
             _state = GameState.GameOver;
-            // Check for new record (score at time of death)
+            
             if (_score > _highScore)
             {
                 _highScore = _score;
                 SaveHighScore();
                 _isNewRecord = true;
-                // start blink timer
+                
                 _newRecordBlinkStartMs = _stopwatch.Elapsed.TotalMilliseconds;
             }
             else
@@ -143,7 +143,7 @@ public sealed class Game
             switch (_item.Type)
             {
                 case ItemType.Normal:
-                    // Normal apples are worth 10 points in Normal mode and in Extreme mode
+                    
                     _score += 10;
                     _foodsConsumed++;
                     break;
@@ -152,7 +152,7 @@ public sealed class Game
                     _foodsConsumed++;
                     break;
                 case ItemType.Poison:
-                    // Poison is -10 on all difficulties (as requested)
+                    
                     _score = Math.Max(0, _score - 10);
                     break;
             }
@@ -168,7 +168,7 @@ public sealed class Game
         {
             var key = Console.ReadKey(intercept: true).Key;
 
-            // Allow mode selection on the start screen with keys 1-2
+            
             if (_state == GameState.Start)
             {
                 switch (key)
@@ -214,7 +214,6 @@ public sealed class Game
                         StartGame(Direction.Right);
                     }
                     break;
-                // (L toggle removed) 
                 case ConsoleKey.Q:
                 case ConsoleKey.Escape:
                     _isRunning = false;
@@ -228,33 +227,31 @@ public sealed class Game
         var widthWithBorder = PlayfieldWidth + 2;
         var heightWithBorder = PlayfieldHeight + 2;
         var isExtreme = _difficulty == Difficulty.Extreme;
-        // In Extreme mode inner cells are rendered as two characters wide, so the displayed
-        // line width increases by PlayfieldWidth characters.
+        
         var displayedWidth = isExtreme ? widthWithBorder + PlayfieldWidth : widthWithBorder;
-        // The maximum possible displayed width (when Extreme is active) — use this to fully
-        // clear lines so switching between modes doesn't leave leftover characters.
+        
         var maxDisplayedWidth = widthWithBorder + PlayfieldWidth;
         var scoreboardLine = BuildScoreboard(maxDisplayedWidth);
 
         Console.SetCursorPosition(0, 0);
 
-        // Compute blink state once so scoreboard and messages stay in sync
+        
         var elapsedSinceNewRecord = _newRecordBlinkStartMs > 0 ? _stopwatch.Elapsed.TotalMilliseconds - _newRecordBlinkStartMs : 0.0;
         _newRecordBlinkActive = _isNewRecord && _newRecordBlinkStartMs > 0 && elapsedSinceNewRecord <= NewRecordBlinkDurationMs;
         _newRecordBlinkOn = _newRecordBlinkActive && (((int)(elapsedSinceNewRecord / NewRecordBlinkIntervalMs) % 2) == 0);
 
-        // Prepare centered GAME OVER message coordinates (used when game is over)
+
         const string gameOverMessage = "GAME OVER !";
-        var boardCenterY = heightWithBorder / 2; // integer center of board (includes borders)
+        var boardCenterY = heightWithBorder / 2; 
         var messageStartX = Math.Max(1, (widthWithBorder - gameOverMessage.Length) / 2);
 
-        // Draw scoreboard with colored high score (blink when new record)
+        
         Console.ResetColor();
         var scorePart = $"Score: {_score,4}  ";
         var highPart = $"High: {_highScore,4}  ";
         var restPart = $"Level: {_level,2}  Length: {_snake.Length,3}";
 
-        // Write the scoreboard piecewise but ensure the full line is overwritten
+        
         Console.Write(scorePart);
         if (_newRecordBlinkActive)
         {
@@ -276,13 +273,13 @@ public sealed class Game
             Console.ResetColor();
         }
 
-        // Compose the rest of the scoreboard and pad to the maximum displayed width to avoid leftover text
+        
         Console.Write(restPart);
         var currentLine = scorePart + ( _newRecordBlinkActive && !_newRecordBlinkOn ? new string(' ', highPart.Length) : highPart ) + restPart;
         Console.Write(new string(' ', Math.Max(0, maxDisplayedWidth - currentLine.Length)));
         Console.WriteLine();
 
-        // Border characters (box-drawing)
+    
         const string topLeft = "╔";
         const string topRight = "╗";
         const string bottomLeft = "╚";
@@ -294,48 +291,12 @@ public sealed class Game
 
         for (var y = 0; y < heightWithBorder; y++)
         {
-            // In Extreme mode, draw the top/bottom border as a single string so corners
-            // connect cleanly with the doubled horizontals. Fall back to per-cell
-            // rendering for interior rows and non-Extreme mode.
-            if (isExtreme && (y == 0 || y == heightWithBorder - 1))
-            {
-                Console.ForegroundColor = borderColor;
-                if (y == 0)
-                {
-                    Console.Write(topLeft);
-                }
-                else
-                {
-                    Console.Write(bottomLeft);
-                }
-
-                // Draw the interior horizontals doubled per inner cell
-                var innerCount = Math.Max(0, widthWithBorder - 2);
-                Console.Write(new string('═', innerCount * 2));
-
-                if (y == 0)
-                {
-                    Console.Write(topRight);
-                }
-                else
-                {
-                    Console.Write(bottomRight);
-                }
-
-                // pad and finish the line
-                var padLengthBorder = Math.Max(0, maxDisplayedWidth - displayedWidth);
-                if (padLengthBorder > 0) Console.Write(new string(' ', padLengthBorder));
-                Console.ResetColor();
-                Console.WriteLine();
-                continue;
-            }
-
             for (var x = 0; x < widthWithBorder; x++)
             {
                 string cell = " ";
                 ConsoleColor? color = null;
 
-                // Border
+                
                 if (y == 0)
                 {
                     if (x == 0) cell = topLeft;
@@ -360,8 +321,7 @@ public sealed class Game
                     var pos = new Position(x, y);
                     if (_item.Position == pos && _state != GameState.GameOver)
                     {
-                        // Render item based on type and difficulty. In Extreme mode the rare
-                        // fruit will begin flashing after a short delay.
+                        
                         switch (_item.Type)
                         {
                             case ItemType.Normal:
@@ -371,7 +331,7 @@ public sealed class Game
                             case ItemType.Rare:
                                 if (_difficulty == Difficulty.Extreme)
                                 {
-                                    // Determine elapsed time since spawn and start flashing after the delay
+                                    
                                     var elapsedSinceSpawn = _stopwatch.Elapsed.TotalMilliseconds - _item.SpawnMs;
                                     if (elapsedSinceSpawn >= RareFlashDelayMs)
                                     {
@@ -398,14 +358,10 @@ public sealed class Game
                     }
                     else if (_snake.TryGetSegmentAt(pos, out var index))
                     {
-                        // Make the snake look a bit more "alive":
-                        // - Use a distinct head with eyes
-                        // - Draw the tail with a smaller dot
-                        // - Keep the body rounded
+                        
                         if (index == 0)
                         {
-                            // Use a bold circle for the head so it
-                            // stands out from the body segments.
+                            
                             cell = "●";
                             color = ConsoleColor.Green;
                         }
@@ -442,9 +398,7 @@ public sealed class Game
                     Console.ResetColor();
                 }
 
-                // In Extreme mode we render cells as roughly two columns wide.
-                // Emoji items are printed as-is (they usually occupy two columns).
-                // Other cells get padded with one extra space so the grid stays aligned.
+                
                 if (isExtreme)
                 {
                     if (cell == "🍎" || cell == "🍇" || cell == "💣")
@@ -453,13 +407,12 @@ public sealed class Game
                     }
                     else if (cell == horizontal)
                     {
-                        // draw horizontal double for nicer border in extreme mode
+                        
                         Console.Write(new string('═', 2));
                     }
                     else if (cell == topLeft || cell == topRight || cell == bottomLeft || cell == bottomRight || cell == vertical)
                     {
-                        // Corners should be printed without an extra trailing space so the
-                        // doubled horizontals line up cleanly next to them.
+                        
                         Console.Write(cell);
                     }
                     else
@@ -490,7 +443,52 @@ public sealed class Game
         var messages = new StringBuilder();
         // Use maxDisplayedWidth so message lines fully cover any previous content
         AppendMessageLines(messages, maxDisplayedWidth);
-        Console.Write(messages.ToString());
+
+        // Write each message line to a fixed console row to avoid wrapping/scrolling.
+        var messageStartRow = 1 + heightWithBorder; // scoreboard occupies row 0
+        WriteMessageLines(messages, messageStartRow, maxDisplayedWidth);
+    }
+
+    private void WriteMessageLines(StringBuilder builder, int startRow, int width)
+    {
+        var text = builder.ToString();
+        var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        // Try to get window dimensions to avoid writing outside the visible area.
+        int windowWidth;
+        int windowHeight;
+        try
+        {
+            windowWidth = Console.WindowWidth;
+            windowHeight = Console.WindowHeight;
+        }
+        catch
+        {
+            windowWidth = int.MaxValue;
+            windowHeight = int.MaxValue;
+        }
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i] ?? string.Empty;
+            // Clamp to width and to the actual window width to prevent wrapping.
+            var writeWidth = Math.Min(width, windowWidth);
+            if (line.Length > writeWidth) line = line.Substring(0, writeWidth);
+            else if (line.Length < writeWidth) line = line.PadRight(writeWidth);
+
+            // If the target row is outside the current window, skip writing to avoid causing scroll.
+            if (startRow + i >= windowHeight) continue;
+
+            try
+            {
+                Console.SetCursorPosition(0, startRow + i);
+                Console.ResetColor();
+                Console.Write(line);
+            }
+            catch
+            {
+                // Ignore issues setting cursor (some terminals may disallow positions).
+            }
+        }
     }
 
     private void AppendMessageLines(StringBuilder builder, int width)
@@ -543,14 +541,15 @@ public sealed class Game
         // Append the persistent restart/quit line (does not blink)
         builder.AppendLine(line4);
 
-        // If we're in Extreme mode and not on the start screen, show a concise legend
-        // for the emoji items below the usual messages.
-        if (_difficulty == Difficulty.Extreme && _state != GameState.Start)
-        {
-            builder.AppendLine("🍎 Normal food = +10 score".PadRight(messageWidth));
-            builder.AppendLine("🍇 Rare fruit = +20 score".PadRight(messageWidth));
-            builder.AppendLine("💣 Poison = -10 score".PadRight(messageWidth));
-        }
+        // Always append three legend lines so the total number of message lines is constant.
+        // When not in Extreme mode these are blank lines; when in Extreme mode they show the legend.
+        var legend1 = _difficulty == Difficulty.Extreme ? "🍎 Normal food = +10 score".PadRight(messageWidth) : string.Empty.PadRight(messageWidth);
+        var legend2 = _difficulty == Difficulty.Extreme ? "🍇 Rare fruit = +20 score".PadRight(messageWidth) : string.Empty.PadRight(messageWidth);
+        var legend3 = _difficulty == Difficulty.Extreme ? "💣 Poison = -10 score".PadRight(messageWidth) : string.Empty.PadRight(messageWidth);
+
+        builder.AppendLine(legend1);
+        builder.AppendLine(legend2);
+        builder.AppendLine(legend3);
     }
 
     private string BuildScoreboard(int width)
