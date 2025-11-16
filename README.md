@@ -156,7 +156,7 @@ Tip: Use a terminal that supports UTF‑8 so box‑drawing characters and emojis
 
 ## Credits
 
-Built with care by **Yaz and Anes**.
+Built with care by **Yazeed and Anes**.
 
 ---
 
